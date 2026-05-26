@@ -1,0 +1,16 @@
+# Exported local Windsurf sessions can contain private prompts, code, paths, and secrets.
+exports/
+tmp-*/
+debug_*.txt
+
+# Runtime and OS noise
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db
+
+# Editor state
+.vscode/
+.idea/

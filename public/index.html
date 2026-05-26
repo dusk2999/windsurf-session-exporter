@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Windsurf Session Exporter Dashboard</title>
+  
+  <!-- Premium Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- CSS Library for syntax highlighting (downloaded by server or loaded) -->
+  <link rel="stylesheet" href="libs/prism.css" id="prism-theme">
+  
+  <!-- Custom premium styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  
+  <div class="app-container">
+    
+    <!-- Sidebar for listing sessions -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">
+          <div class="brand-logo">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="url(#brand-grad)" />
+              <path d="M2 17L12 22L22 17M2 12L12 17L22 12" stroke="url(#brand-grad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <defs>
+                <linearGradient id="brand-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#6366f1" />
+                  <stop offset="50%" stop-color="#a855f7" />
+                  <stop offset="100%" stop-color="#06b6d4" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <h2>Windsurf</h2>
+            <span>Session Exporter</span>
+          </div>
+        </div>
+        <button id="btn-refresh" class="btn-icon" title="刷新 Session 列表">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+          </svg>
+        </button>
+      </div>
+      
+      <div class="search-container">
+        <div class="search-wrapper">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input type="text" id="search-input" placeholder="搜索 Session 标题或工作区..." autocomplete="off">
+          <span class="search-badge">Ctrl K</span>
+        </div>
+      </div>
+      
+      <div class="session-list-container">
+        <div id="session-list" class="session-list">
+          <!-- Session items injected here -->
+          <div class="list-skeleton">
+            <div class="skeleton-item"></div>
+            <div class="skeleton-item"></div>
+            <div class="skeleton-item"></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+    
+    <!-- Main workspace content -->
+    <main class="main-content">
+      
+      <!-- Top header status bar -->
+      <header class="status-bar">
+        <div class="status-connection">
+          <span class="status-indicator" id="status-dot"></span>
+          <span class="status-text" id="status-text">检测中...</span>
+        </div>
+        <div class="header-actions">
+          <button id="btn-open-folder" class="btn btn-secondary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+            </svg>
+            打开导出文件夹
+          </button>
+        </div>
+      </header>
+      
+      <div class="view-container">
+        
+        <!-- View 1: Empty State / General Dashboard -->
+        <section id="dashboard-view" class="view dashboard-view active">
+          <div class="hero-section">
+            <div class="hero-logo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                <line x1="12" y1="22.08" x2="12" y2="12" />
+              </svg>
+            </div>
+            <h1>Windsurf Session Exporter</h1>
+            <p>通过本地运行的 language server 接口，一键导出清洗后的 Cascade/Agent 会话正文。</p>
+          </div>
+          
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">总会话数</span>
+                <h3 id="stat-total-sessions">-</h3>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-icon cyan">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                  <line x1="8" y1="21" x2="16" y2="21" />
+                  <line x1="12" y1="17" x2="12" y2="21" />
+                </svg>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">正在运行进程</span>
+                <h3 id="stat-process-status">未连接</h3>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-icon emerald">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                  <polyline points="10 9 9 9 8 9" />
+                </svg>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">已保存导出</span>
+                <h3 id="stat-exported-files">-</h3>
+              </div>
+            </div>
+          </div>
+          
+          <div class="dashboard-actions">
+            <h2>快速开始</h2>
+            <div class="action-list">
+              <div class="action-item">
+                <div class="action-number">1</div>
+                <div class="action-body">
+                  <h4>启动 Windsurf</h4>
+                  <p>请确保 Windsurf 处于运行状态，并且右侧 Cascade/Agent 面板已成功加载。</p>
+                </div>
+              </div>
+              <div class="action-item">
+                <div class="action-number">2</div>
+                <div class="action-body">
+                  <h4>选择会话</h4>
+                  <p>在左侧侧边栏中选择你想导出的会话，支持通过标题或工作区模糊检索。</p>
+                </div>
+              </div>
+              <div class="action-item">
+                <div class="action-number">3</div>
+                <div class="action-body">
+                  <h4>自定义并导出</h4>
+                  <p>可以自由切换是否包含 Tool 运行噪声，预览 Markdown 格式，然后一键导出到本地。</p>
+                </div>
+              </div>
+            </div>
+            <div class="dashboard-buttons">
+              <button id="btn-export-all-dashboard" class="btn btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                </svg>
+                批量导出全部会话
+              </button>
+            </div>
+          </div>
+        </section>
+        
+        <!-- View 2: Detailed Session View -->
+        <section id="session-view" class="view session-view">
+          <div class="session-detail-header">
+            <div class="session-info">
+              <h1 id="view-title">会话标题</h1>
+              <div class="session-meta">
+                <span class="meta-item">
+                  <strong>ID:</strong> <code id="view-cascade-id">86f62e25-...</code>
+                </span>
+                <span class="meta-item">
+                  <strong>工作区:</strong> <span id="view-workspace">/path/to/workspace</span>
+                </span>
+                <span class="meta-item">
+                  <strong>总步骤:</strong> <span id="view-steps">-</span>
+                </span>
+              </div>
+            </div>
+            
+            <div class="session-toolbar">
+              <!-- Include Tools Switcher -->
+              <div class="tool-switch-container">
+                <span class="switch-label">包含 Tool 噪声</span>
+                <label class="switch">
+                  <input type="checkbox" id="toggle-include-tools">
+                  <span class="slider round"></span>
+                </label>
+              </div>
+              
+              <div class="action-group">
+                <button id="btn-export-md" class="btn btn-primary">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                  </svg>
+                  导出 Markdown
+                </button>
+                <button id="btn-export-json" class="btn btn-secondary">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                  </svg>
+                  导出 JSON
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Scrollable messages container -->
+          <div id="messages-container" class="messages-container">
+            <!-- Messages bubbles will be injected here -->
+          </div>
+        </section>
+        
+      </div>
+    </main>
+    
+  </div>
+  
+  <!-- Global loading indicator overlay -->
+  <div id="loading-overlay" class="loading-overlay">
+    <div class="spinner-box">
+      <div class="circle-spinner"></div>
+      <p id="loading-text">正在从 Windsurf RPC 端口加载会话数据...</p>
+    </div>
+  </div>
+  
+  <!-- Global Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+  
+  <!-- Local dependencies scripts -->
+  <script src="libs/marked.min.js"></script>
+  <script src="libs/purify.min.js"></script>
+  <script src="libs/prism.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
