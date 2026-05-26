@@ -1,3 +1,4 @@
+AI社区：https://linux.do
 # Windsurf Session Exporter
 
 一个用于导出本机 Windsurf Cascade / Agent 会话正文的小工具。
